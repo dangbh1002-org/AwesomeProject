@@ -4,7 +4,7 @@ export default class App extends Component {
   render(){
     return(
       <View style={{paddingTop: 20}}>
-        <Text>Hello world from Brian Dhang</Text>
+        <Text>Hello world from the Mars 222</Text>
       </View>
     );
   }
