@@ -1,8 +1,10 @@
 import React from 'react';
 import { Image, TouchableOpacity, Text, Platform } from 'react-native';
 
-import Icon from '@expo/vector-icons/FontAwesome';
-import {Ionicons} from '@expo/vector-icons';
+
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+
 import Color from './ColorConfig'
 
 import { StackNavigator, TabNavigator } from 'react-navigation';
@@ -79,7 +81,7 @@ const Tabs = TabNavigator({
     navigationOptions: {
       title: 'Tasks',
       tabBarIcon: ({ tintColor }) => (
-        <Icon name='tasks' size={26} color={tintColor} />
+        <FontAwesome name='tasks' size={26} color={tintColor} />
       ),
     },
 
@@ -96,7 +98,7 @@ const Tabs = TabNavigator({
     navigationOptions: {
       title: 'Customers',
       tabBarIcon: ({ tintColor }) => (
-        <Icon name='heartbeat' size={30} color={tintColor} />
+        <FontAwesome name='heartbeat' size={30} color={tintColor} />
       ),
     }
   },

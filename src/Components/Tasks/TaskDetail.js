@@ -13,10 +13,19 @@ import {
 } from 'react-native';
 import Color from '../ColorConfig';
 
-import {Ionicons} from '@expo/vector-icons';
+import ImagePicker from 'react-native-image-picker';
+var options = {
+  title: 'Select Images',
+  storageOptions: {
+    skipBackup: true,
+    path: 'images'
+  }
+};
+
+// import {Ionicons} from '@expo/vector-icons';
 
 let firebase = require('firebase');
-import { ImagePicker } from 'expo';
+// import { ImagePicker } from 'expo';
 import base64 from 'base64-js';
 
 export default class TaskDetail extends Component {
@@ -73,53 +82,59 @@ export default class TaskDetail extends Component {
 
   _pickImageFromCamera = async () => {
 
-    let result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [4, 3],
-      base64: true
+    ImagePicker.launchCamera(options, (response) => {
+
+      if (response.didCancel) {
+      }
+      else if (response.error) {
+      }
+      else if (response.customButton) {
+      }
+      else {
+        let uri = response.uri;
+        let name = response.fileName;
+        let key = name.split('.')[0];
+        let mime = 'image/'+name.split('.')[1];
+
+        let item = {key: key, name: name, uri: uri, mime: mime, base64: response.data  };
+
+        if(!this.state.imageObject[key]){
+          this.state.imageObject[key] = item;
+          this.state.imageArray.push(item);
+          this.setState({imageArray: this.state.imageArray, imageObject: this.state.imageObject });
+        }
+
+      }
     });
 
-    if (!result.cancelled) {
-      let uri = result.uri;
-      let array = uri.split('/');
-      let name = array[array.length - 1];
-      let key = name.split('.')[0];
-      let mime = 'image/'+name.split('.')[1];
-
-      let item = {key: key, name: name, uri: uri, mime: mime, base64: result.base64  };
-
-      if(!this.state.imageObject[key]){
-        this.state.imageObject[key] = item;
-        this.state.imageArray.push(item);
-        this.setState({imageArray: this.state.imageArray, imageObject: this.state.imageObject });
-      }
-
-    }
   };
 
   _pickImageFromLibrary = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      allowsEditing: true,
-      aspect: [4, 3],
-      base64: true
-    });
 
-    if (!result.cancelled) {
-      let uri = result.uri;
-      let array = uri.split('/');
-      let name = array[array.length - 1];
-      let key = name.split('.')[0];
-      let mime = 'image/'+name.split('.')[1];
+    ImagePicker.launchImageLibrary(options, (response) => {
 
-      let item = {key: key, name: name, uri: uri, mime: mime, base64: result.base64  };
-
-      if(!this.state.imageObject[key]){
-        this.state.imageObject[key] = item;
-        this.state.imageArray.push(item);
-        this.setState({imageArray: this.state.imageArray, imageObject: this.state.imageObject });
+      if (response.didCancel) {
       }
+      else if (response.error) {
+      }
+      else if (response.customButton) {
+      }
+      else {
+        let uri = response.uri;
+        let name = response.fileName;
+        let key = name.split('.')[0];
+        let mime = 'image/'+name.split('.')[1];
 
-    }
+        let item = {key: key, name: name, uri: uri, mime: mime, base64: response.data  };
+
+        if(!this.state.imageObject[key]){
+          this.state.imageObject[key] = item;
+          this.state.imageArray.push(item);
+          this.setState({imageArray: this.state.imageArray, imageObject: this.state.imageObject });
+        }
+
+      }
+    });
   };
 
   _removeImage(index, key){
@@ -136,8 +151,8 @@ export default class TaskDetail extends Component {
 
     let vm = this;
     let timeStamp = new Date().getTime() + (Math.floor(Math.random() * 8999) + 1000).toString();
-
     this.setState({uploadedImage: [], isLoading: true});
+
     this._uploadSingle(this.state.imageArray, timeStamp, this.state.imageArray.length).then(imagesArray=>{
 
       let Root = firebase.database().ref();
@@ -155,7 +170,6 @@ export default class TaskDetail extends Component {
 
       })
 
-
     })
   }
 
@@ -164,14 +178,12 @@ export default class TaskDetail extends Component {
     let vm = this;
 
     return new Promise((resolve, reject) => {
-
       let item = arrayData[index-1];
-      contentType = item.mime;
-      name = item.name;
+      let contentType = item.mime;
+      let name = item.name;
       let imageRef = firebase.storage().ref().child('/productImages/' + timeStamp + '/' + name);
 
       let blob = base64.toByteArray(item.base64);
-
       let uploadTask =  imageRef.put(blob, {contentType: contentType});
       return uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED,
               snapshot => {
@@ -179,7 +191,6 @@ export default class TaskDetail extends Component {
               }, error => {
                 console.log(error.code);
               }, () => {
-
                 vm.state.uploadedImage.push(
                   {
                     fullPath: uploadTask.snapshot.metadata.fullPath,
@@ -187,8 +198,10 @@ export default class TaskDetail extends Component {
                   }
                 );
                 if(index == 1){
+                  console.log(1);
                   resolve(vm.state.uploadedImage);
                 } else {
+                  console.log(2);
                   resolve(this._uploadSingle(arrayData, timeStamp, index - 1));
                 }
 
@@ -227,7 +240,7 @@ export default class TaskDetail extends Component {
           <View style={{flexDirection: 'row', }}>
             <View style={{flex: 1}}>
               <TouchableOpacity onPress={this._pickImageFromCamera} style={styles.cameraButton}>
-                <Ionicons name='ios-camera' size={45} color='white' />
+                {/* <Ionicons name='ios-camera' size={45} color='white' /> */}
                 <Text style={{color: 'white', fontSize: 18}}>
                   Camera
                 </Text>
@@ -236,7 +249,7 @@ export default class TaskDetail extends Component {
 
             <View style={{flex: 1}}>
               <TouchableOpacity onPress={this._pickImageFromLibrary} style={styles.cameraButton}>
-                <Ionicons name='md-photos' size={45} color='white' />
+                {/* <Ionicons name='md-photos' size={45} color='white' /> */}
                 <Text style={{color: 'white', fontSize: 18}}>
                   Photo Library
                 </Text>

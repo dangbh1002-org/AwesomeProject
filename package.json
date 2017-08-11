@@ -7,8 +7,15 @@
 		"test": "jest"
 	},
 	"dependencies": {
+		"babel-plugin-transform-remove-console": "^6.8.4",
+		"base64-js": "^1.2.1",
+		"firebase": "^4.2.0",
+		"firebase-functions": "^0.6.1",
 		"react": "16.0.0-alpha.12",
-		"react-native": "0.47.1"
+		"react-native": "0.47.1",
+		"react-native-image-picker": "^0.26.3",
+		"react-native-vector-icons": "^4.3.0",
+		"react-navigation": "^1.0.0-beta.11"
 	},
 	"devDependencies": {
 		"babel-jest": "20.0.3",
