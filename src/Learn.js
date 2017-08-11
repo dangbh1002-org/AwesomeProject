@@ -1,72 +1,76 @@
 import React, { Component }  from 'react';
-import { StyleSheet, View, Text } from 'react-native';
-import {Notifications} from 'expo';
-import PushController from './PushController';
+import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+// import { createStore } from 'redux';
 
-const PUSH_ENDPOINT = 'https://exp.host/--/api/v2/push/send';
-const messages = [
-  {
-    to: "ExponentPushToken[HcvdjFJLYBxxYguBxvvc6w]",
-    sound: 'default',
-    body: "You've got mail",
-    data: { taskId: 'Fucking sweet' }
-  },
-  {
-    to: "ExponentPushToken[PkgQWtKnZo4jLnoX6DIgaU]",
-    sound: 'default',
-    title: 'Title here..',
-    body: "You've got mail",
-    data: { taskId: 'Fucking sweet' }
+const createStore = (reducer) => {
+
+  let state;
+  let listener = () => {};
+
+  const getState = () => state;
+
+  const dispatch = (action) => {
+    state = reducer(state, action);
+    listener();
+  };
+
+  const subscribe = (callBack) => {
+    listener = callBack;
   }
-]
 
+  dispatch({});
+  return { dispatch, getState, subscribe };
+}
 
 export default class App extends Component {
   constructor(props){
     super(props)
-    this.state= {
-      notification: {}
+    this.state = {
+      counter: 0
     }
-    this._handleNotification = this._handleNotification.bind(this);
+
+    this.store = null;
+
+    this._onPress = this._onPress.bind(this);
+  }
+
+  counter(state = 0, action){
+    switch (action.type) {
+      case 'INCREMENT':
+        return state + 1;
+      case 'DECREMENT':
+        return state - 1;
+      default:
+        return state
+    }
   }
 
   componentDidMount(){
-    this._pushNotification();
-    this._notificationSubscription = Notifications.addListener(this._handleNotification);
-  }
 
-  _pushNotification(){
-    return fetch(PUSH_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'accept-encoding': 'gzip, deflate'
-      },
-      body: JSON.stringify(messages)
-    })
-    .then(res => res.json())
-    .then(resJson => {
-      console.log(resJson);
+    this.store = createStore(this.counter);
+    this.store.subscribe(() => {
+      this.setState({counter: this.store.getState()});
     });
   }
 
-  _handleNotification(notification){
-    console.log(notification);
-    this.setState({notification: notification})
+  _onPress(param){
+    this.store.dispatch({type: param});
   }
+
 
   render(){
     return(
       <View style={styles.container}>
+        <TouchableOpacity onPress={() => this._onPress('INCREMENT')}>
+          <Text>INCREMENT</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => this._onPress('DECREMENT')}>
+          <Text>DECREMENT</Text>
+        </TouchableOpacity>
+
         <Text style={styles.welcome}>
-          Choose your notifycation time in seconds.
+          Hello world from the Mars: {this.state.counter}
         </Text>
-
-        <Text>Origin: {this.state.notification.origin}</Text>
-        <Text>Data: {JSON.stringify(this.state.notification.data)}</Text>
-        <PushController/>
-
       </View>
     );
   }
@@ -83,8 +87,5 @@ const styles = StyleSheet.create({
     fontSize: 20,
     textAlign: 'center',
     margin: 10
-  },
-  picker: {
-    width: 100
   }
 })

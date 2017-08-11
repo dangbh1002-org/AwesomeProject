@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Image, TouchableOpacity, Text, Platform } from 'react-native';
 

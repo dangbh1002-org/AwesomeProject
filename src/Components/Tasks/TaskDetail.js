@@ -21,8 +21,7 @@ var options = {
     path: 'images'
   }
 };
-
-// import {Ionicons} from '@expo/vector-icons';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 let firebase = require('firebase');
 // import { ImagePicker } from 'expo';
@@ -240,7 +239,7 @@ export default class TaskDetail extends Component {
           <View style={{flexDirection: 'row', }}>
             <View style={{flex: 1}}>
               <TouchableOpacity onPress={this._pickImageFromCamera} style={styles.cameraButton}>
-                {/* <Ionicons name='ios-camera' size={45} color='white' /> */}
+                <Ionicons name='ios-camera' size={45} color='white' />
                 <Text style={{color: 'white', fontSize: 18}}>
                   Camera
                 </Text>
@@ -249,7 +248,7 @@ export default class TaskDetail extends Component {
 
             <View style={{flex: 1}}>
               <TouchableOpacity onPress={this._pickImageFromLibrary} style={styles.cameraButton}>
-                {/* <Ionicons name='md-photos' size={45} color='white' /> */}
+                <Ionicons name='md-photos' size={45} color='white' />
                 <Text style={{color: 'white', fontSize: 18}}>
                   Photo Library
                 </Text>

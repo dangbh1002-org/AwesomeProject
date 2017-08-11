@@ -81,9 +81,10 @@ export default class Tasks extends Component {
 
         ref.child(`tasks/${taskId}`).once('value', snapTask => {
 
-          let taskVal = snapTask.val();
-          taskVal.key = snapTask.key;
-
+          let taskVal = {
+            ...snapTask.val(),
+            key: snapTask.key
+          };
           /**
            * CHECK RULES OF TASK
            */
@@ -96,17 +97,6 @@ export default class Tasks extends Component {
           if( now < startDate  || now > endDatePlus){
             return;
           }
-
-
-          // check later in day
-          // let HH = Number(taskVal.actionTime.HH);
-          // let mm = Number(taskVal.actionTime.mm);
-          // let beforeActionTime = new Date().setHours(HH - 1,mm);
-          // let afterActionTime = new Date().setHours(HH + 1,mm);
-          //
-          // if((taskVal.later === 'true' && now < beforeActionTime) || (taskVal.later === 'false' && now > afterActionTime)){
-          //   return;
-          // }
 
           let today = new Date().getDay().toString();
 
