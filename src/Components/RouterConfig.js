@@ -21,12 +21,7 @@ const Tasks_Stack = StackNavigator({
     navigationOptions: {
       title: 'List task',
       headerStyle: {
-        backgroundColor: Color.purple,
-        ...Platform.select({
-          android: {
-            marginTop: 20,
-          },
-        }),
+        backgroundColor: Color.purple
        },
       headerTintColor: 'white'
     }
@@ -42,12 +37,7 @@ const Tasks_Stack = StackNavigator({
           <Text style={{color: 'white', fontSize: 18}}>Submit</Text>
         </TouchableOpacity>,
         headerStyle: {
-          backgroundColor: Color.purple,
-          ...Platform.select({
-            android: {
-              marginTop: 20,
-            },
-          }),
+          backgroundColor: Color.purple
          },
         headerTintColor: 'white'
 
@@ -62,12 +52,7 @@ const Setting_Stack = StackNavigator({
     navigationOptions: {
       title: 'Settings',
       headerStyle: {
-        backgroundColor: Color.purple,
-        ...Platform.select({
-          android: {
-            marginTop: 20,
-          },
-        }),
+        backgroundColor: Color.purple
        },
       headerTintColor: 'white'
     }
