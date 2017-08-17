@@ -10,8 +10,8 @@ import Color from './ColorConfig'
 
 import { StackNavigator, TabNavigator } from 'react-navigation';
 
-import Tasks from './Tasks/Tasks.js';
-import TaskDetail from './Tasks/TaskDetail.js';
+import Tasks from './Tasks/Tasks.component.js';
+import TaskDetail from './TaskDetail/TaskDetail.js';
 import Settings from './Settings/Settings.js';
 
 // Stack
