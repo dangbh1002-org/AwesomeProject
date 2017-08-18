@@ -23,214 +23,51 @@ var options = {
 };
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-let firebase = require('firebase');
-// import { ImagePicker } from 'expo';
-import base64 from 'base64-js';
-
-export default class TaskDetail extends Component {
+class TaskDetail extends Component {
 
   constructor(props){
     super(props)
     this.state = {
-      auth: null,
-      user: null,
-      imageArray: [],
-      imageObject: {},
-
-      uploadedImage: [],
-      progress: null,
       note: null,
     }
-
-    this._getAuth = this._getAuth.bind(this);
-    this._pickImageFromCamera = this._pickImageFromCamera.bind(this);
-    this._pickImageFromLibrary = this._pickImageFromLibrary.bind(this);
-    this._uploadSingle = this._uploadSingle.bind(this);
     this._submit = this._submit.bind(this);
   }
 
   componentDidMount(){
-    this._getAuth();
     this.props.navigation.setParams({handleSave: this._submit});
   }
 
-  _getAuth () {
-    let vm = this;
-    var unsubscribe = firebase.auth().onAuthStateChanged((auth) => {
-      if(auth){
-        vm.setState({auth: auth});
-        var userRef = firebase.database().ref().child('users/' + auth.uid);
-        userRef.on('value', function (snapshot) {
-          vm.setState({user: snapshot.val()});
-        });
-
-      } else {
-        unsubscribe();
-      }
-
-    });
-
-  }
-
-  _removeImage(index, key){
-    this.state.imageArray.splice(index, 1);
-    delete this.state.imageObject[index];
-    delete this.state.imageObject[key];
-    this.setState({imageArray: this.state.imageArray, imageObject: this.state.imageObject });
-  }
-
-  _pickImageFromCamera = async () => {
-
-    ImagePicker.launchCamera(options, (response) => {
-
-      if (response.didCancel) {
-      }
-      else if (response.error) {
-      }
-      else if (response.customButton) {
-      }
-      else {
-        let uri = response.uri;
-        let name = response.fileName;
-        let key = name.split('.')[0];
-        let mime = 'image/'+name.split('.')[1];
-
-        let item = {key: key, name: name, uri: uri, mime: mime, base64: response.data  };
-
-        if(!this.state.imageObject[key]){
-          this.state.imageObject[key] = item;
-          this.state.imageArray.push(item);
-          this.setState({imageArray: this.state.imageArray, imageObject: this.state.imageObject });
-        }
-
-      }
-    });
-
-  };
-
-  _pickImageFromLibrary = async () => {
-
-    ImagePicker.launchImageLibrary(options, (response) => {
-
-      if (response.didCancel) {
-      }
-      else if (response.error) {
-      }
-      else if (response.customButton) {
-      }
-      else {
-        let uri = response.uri;
-        let name = response.fileName;
-        let key = name.split('.')[0];
-        let mime = 'image/'+name.split('.')[1];
-
-        let item = {key: key, name: name, uri: uri, mime: mime, base64: response.data  };
-
-        if(!this.state.imageObject[key]){
-          this.state.imageObject[key] = item;
-          this.state.imageArray.push(item);
-          this.setState({imageArray: this.state.imageArray, imageObject: this.state.imageObject });
-        }
-
-      }
-    });
-  };
-
-  _removeImage(index, key){
-    this.state.imageArray.splice(index, 1);
-    delete this.state.imageObject[index];
-    delete this.state.imageObject[key];
-    this.setState({imageArray: this.state.imageArray, imageObject: this.state.imageObject });
-  }
-
   _submit(){
-    if(!this.state.note || !this.state.imageArray.length){
-      return;
-    }
-
-    let vm = this;
-    let timeStamp = new Date().getTime() + (Math.floor(Math.random() * 8999) + 1000).toString();
-    this.setState({uploadedImage: [], isLoading: true});
-
-    this._uploadSingle(this.state.imageArray, timeStamp, this.state.imageArray.length).then(imagesArray=>{
-
-      let Root = firebase.database().ref();
-
-      let updateObject = {};
-      updateObject['/reports/' + timeStamp] = {
-        note: vm.state.note,
-        startedAt: firebase.database.ServerValue.TIMESTAMP,
-        images: imagesArray
-      };
-      updateObject[`taskUserReports/${vm.props.navigation.state.params.item.key}/${vm.state.auth.uid}/${timeStamp}`] = true;
-      Root.update(updateObject).then(_ => {
-        vm.setState({uploadedImage: [], isLoading: false});
-        vm.props.navigation.goBack();
-
-      })
-
-    })
-  }
-
-  _uploadSingle(arrayData, timeStamp, index){
-
-    let vm = this;
-
-    return new Promise((resolve, reject) => {
-      let item = arrayData[index-1];
-      let contentType = item.mime;
-      let name = item.name;
-      let imageRef = firebase.storage().ref().child('/productImages/' + timeStamp + '/' + name);
-
-      let blob = base64.toByteArray(item.base64);
-      let uploadTask =  imageRef.put(blob, {contentType: contentType});
-      return uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED,
-              snapshot => {
-                vm.setState({progress: (snapshot.bytesTransferred / snapshot.totalBytes) * 100});
-              }, error => {
-                console.log(error.code);
-              }, () => {
-                vm.state.uploadedImage.push(
-                  {
-                    fullPath: uploadTask.snapshot.metadata.fullPath,
-                    url: uploadTask.snapshot.downloadURL
-                  }
-                );
-                if(index == 1){
-                  console.log(1);
-                  resolve(vm.state.uploadedImage);
-                } else {
-                  console.log(2);
-                  resolve(this._uploadSingle(arrayData, timeStamp, index - 1));
-                }
-
-            });
-
-    });
-
+    this.props.dispatch(
+      _submit(
+        this.props.state.taskDetail.imageArray,
+        this.state.note,
+        this.props.navigation.state.params.item.key,
+        this.props.state.user.data.uid
+      )
+    ).then(_ => this.props.navigation.goBack())
   }
 
   render(){
-
+    const { state, dispatch } = this.props;
     return(
-
       <View style={styles.container}>
 
-        { this.state.isLoading &&
+        { state.taskDetail.isLoading &&
             <ActivityIndicator />
         }
         <View style={styles.resultGroup}>
 
           <View style={{flex: 1, flexDirection: 'row'}}>
             <FlatList style={{flex: 1}}
-              data={this.state.imageArray}
-              extraData={this.state}
+              data={state.taskDetail.imageArray}
+              // extraData={this.state}
               renderItem={({item, index}) =>
                 <View style={styles.imageGroup}>
-                  <TouchableOpacity style={styles.closeButton} onPress={() => this._removeImage(index, item.key)}>
+                  <TouchableOpacity style={styles.closeButton} onPress={() => dispatch({type: 'REMOVE_IMAGE', index })}>
                     <Text style={styles.closeButtonText}>X</Text>
                   </TouchableOpacity>
-                  <Image source={{uri: item.uri}} style={{flex: 1, height: 300, backgroundColor: 'red', borderRadius: 15, margin: 10}}  />
+                  <Image source={{uri: item.uri}} style={{flex: 1, height: 300, borderRadius: 15, margin: 10}}  />
                 </View>
               }
             />
@@ -238,7 +75,7 @@ export default class TaskDetail extends Component {
 
           <View style={{flexDirection: 'row', }}>
             <View style={{flex: 1}}>
-              <TouchableOpacity onPress={this._pickImageFromCamera} style={styles.cameraButton}>
+              <TouchableOpacity onPress={() => dispatch(_pickImageFromCamera())} style={styles.cameraButton}>
                 <Ionicons name='ios-camera' size={45} color='white' />
                 <Text style={{color: 'white', fontSize: 18}}>
                   Camera
@@ -247,7 +84,7 @@ export default class TaskDetail extends Component {
             </View>
 
             <View style={{flex: 1}}>
-              <TouchableOpacity onPress={this._pickImageFromLibrary} style={styles.cameraButton}>
+              <TouchableOpacity onPress={() => dispatch(_pickImageFromLibrary())} style={styles.cameraButton}>
                 <Ionicons name='md-photos' size={45} color='white' />
                 <Text style={{color: 'white', fontSize: 18}}>
                   Photo Library
@@ -274,6 +111,19 @@ export default class TaskDetail extends Component {
     );
   }
 }
+
+import { _pickImageFromCamera, _pickImageFromLibrary, _submit } from './TaskDetail.actions.js'
+import { connect } from 'react-redux';
+
+TaskDetail = connect(
+  state => {
+    return { state }
+  },
+  dispatch => {
+    return { dispatch }
+  }
+)(TaskDetail);
+export default TaskDetail;
 
 const styles = StyleSheet.create({
   container: {
