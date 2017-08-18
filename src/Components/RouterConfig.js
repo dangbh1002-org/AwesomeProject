@@ -2,7 +2,6 @@
 import React from 'react';
 import { Image, TouchableOpacity, Text, Platform } from 'react-native';
 
-
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -10,7 +9,7 @@ import Color from './ColorConfig'
 
 import { StackNavigator, TabNavigator } from 'react-navigation';
 
-import Tasks from './Tasks/Tasks.component.js';
+import Tasks from './Tasks/Tasks.js';
 import TaskDetail from './TaskDetail/TaskDetail.js';
 import Settings from './Settings/Settings.js';
 

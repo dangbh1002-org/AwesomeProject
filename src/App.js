@@ -7,57 +7,24 @@ import {
   TouchableOpacity,
   Platform
 } from 'react-native';
-import { createStore } from 'redux';
 
 import Color from './Components/ColorConfig';
 import firebase from 'firebase';
 import { firebaseApp } from './Components/FirebaseConfig.js';
 import Tabs from './Components/RouterConfig';
 
-export default class AwesomeProject extends Component {
+class App extends Component {
 
   constructor(props){
     super(props)
     this.state = {
-      selectedTab: 'tasksTab',
-      notifCount: 0,
-      presses: 0,
-
       email: 'science.mbti@gmail.com',
-      password: '88888888',
-      auth: null,
-      user: null,
-      isLoading: false
+      password: '88888888'
     }
 
-    this._getAuth = this._getAuth.bind(this);
     this._signIn = this._signIn.bind(this);
     console.ignoredYellowBox = ['Setting a timer'];
   }
-
-  componentDidMount(){
-    this._getAuth();
-  }
-
-  _getAuth (vm = this) {
-
-    vm.setState({isLoading: true})
-
-    var unsubscribe = firebase.auth().onAuthStateChanged((auth) => {
-
-      vm.setState({auth: auth, user: null, isLoading: false});
-      if(auth){
-
-        var userRef = firebase.database().ref().child('users/' + auth.uid);
-        userRef.once('value', function (snapshot) {
-          vm.setState({user: snapshot.val()});
-        });
-
-      }
-
-    });
-  }
-
 
   _signIn(){
 
@@ -65,22 +32,20 @@ export default class AwesomeProject extends Component {
     firebase.auth().signInWithEmailAndPassword(this.state.email, this.state.password).then(function (auth) {
 
     }).catch(function (error) {
-      vm.setState({loginError: true, loginMessage: error.message});
+      this.props.dispatch({ type: 'ERROR', data: error.message})
     });
   }
 
   render(){
-
+    const { state, dispatch } = this.props;
     return(
       <View style={{flex: 1}}>
-
         {
-          this.state.user &&
+          state.user.data &&
           <Tabs/>
         }
-
         {
-          !this.state.isLoading && !this.state.auth &&
+          !state.user.isFetching && !state.user.data &&
           <View style={styles.container}>
             <View style={styles.signInForm}>
               <TextInput underlineColorAndroid='transparent'
@@ -113,6 +78,56 @@ export default class AwesomeProject extends Component {
     );
   }
 
+}
+
+App = connect(
+  state => {
+    return { state }
+  },
+  dispatch => {
+    return { dispatch }
+  }
+)(App)
+
+import { getUser } from './Actions/App.actions.js';
+import rootReducers from './Reducers/App.reducers.js';
+
+import { createStore, applyMiddleware } from 'redux';
+import { Provider, connect } from 'react-redux';
+
+import thunkMiddleware from 'redux-thunk';
+
+import { createLogger } from 'redux-logger';
+const loggerMiddleware = createLogger();
+
+const store = createStore(
+  rootReducers,
+  applyMiddleware(thunkMiddleware, loggerMiddleware)
+);
+
+export default class AwesomeProject extends Component {
+
+  componentDidMount(){
+    this._getAuth();
+  }
+
+  _getAuth (vm = this) {
+    var unsubscribe = firebase.auth().onAuthStateChanged((auth) => {
+      if(auth){
+        store.dispatch(getUser(auth));
+      } else {
+        store.dispatch({ type: 'CLEAR_USER'});
+      }
+    });
+  }
+
+  render(){
+    return(
+      <Provider store={store}>
+        <App />
+      </Provider>
+    );
+  }
 }
 
 const styles = StyleSheet.create({
