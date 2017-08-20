@@ -13,6 +13,8 @@ import firebase from 'firebase';
 import { firebaseApp } from './Components/FirebaseConfig.js';
 import Tabs from './Components/RouterConfig';
 
+import FCM from 'react-native-fcm';
+
 class App extends Component {
 
   constructor(props){
@@ -102,7 +104,8 @@ const loggerMiddleware = createLogger();
 
 const store = createStore(
   rootReducers,
-  applyMiddleware(thunkMiddleware, loggerMiddleware)
+  // applyMiddleware(thunkMiddleware, loggerMiddleware)
+  applyMiddleware(thunkMiddleware)
 );
 
 export default class AwesomeProject extends Component {
@@ -114,8 +117,18 @@ export default class AwesomeProject extends Component {
   _getAuth (vm = this) {
     var unsubscribe = firebase.auth().onAuthStateChanged((auth) => {
       if(auth){
+
+        FCM.requestPermissions(); // for iOS
+        FCM.getFCMToken().then(token => {
+            console.log(token)
+        });
+        const topics = `/topics/${auth.uid}`
+        FCM.subscribeToTopic(topics);
+
         store.dispatch(getUser(auth));
       } else {
+
+        FCM.subscribeToTopic(topics);
         store.dispatch({ type: 'CLEAR_USER'});
       }
     });
