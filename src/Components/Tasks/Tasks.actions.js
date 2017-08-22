@@ -13,10 +13,15 @@ const getTasks = (userId) => {
     dispatch(requestPosts())
 
     let ref = firebase.database().ref();
-    let todayTasks = [];
-    return ref.child(`userTasks/${userId}`).once('value', snapTasks => {
+
+    return ref.child(`userTasks/${userId}`).on('value', snapTasks => {
+      let todayTasks = [];
+      if(snapTasks.val() === null){
+        dispatch(receivePosts(todayTasks));
+      }
 
       snapTasks.forEach(snapTask => {
+
         let taskId = snapTask.key;
         ref.child(`tasks/${taskId}`).once('value', snapTask => {
           let taskVal = {

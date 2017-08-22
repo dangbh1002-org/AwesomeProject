@@ -67,7 +67,6 @@ class Tasks extends Component {
 
     return(
       <View style={styles.container}>
-        <Text>{state.tasks.isFetching || state.user.isFetching?'Loading...':''}</Text>
 
         <ScrollView
           refreshControl={
@@ -77,6 +76,12 @@ class Tasks extends Component {
             />
           }
           >
+            { !state.tasks.isFetching && state.tasks.data.length === 0 &&
+              <Text style={{marginTop: 10}}>
+                You have no task!
+              </Text>
+            }
+
 
           <FlatList
             scrollEnabled={false}

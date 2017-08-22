@@ -116,19 +116,22 @@ export default class AwesomeProject extends Component {
 
   _getAuth (vm = this) {
     var unsubscribe = firebase.auth().onAuthStateChanged((auth) => {
+      let topics = null;
       if(auth){
 
         FCM.requestPermissions(); // for iOS
         FCM.getFCMToken().then(token => {
             console.log(token)
         });
-        const topics = `/topics/${auth.uid}`
+        topics = `/topics/${auth.uid}`
         FCM.subscribeToTopic(topics);
 
         store.dispatch(getUser(auth));
       } else {
+        if(topics){
+          FCM.subscribeToTopic(topics);
+        }
 
-        FCM.subscribeToTopic(topics);
         store.dispatch({ type: 'CLEAR_USER'});
       }
     });

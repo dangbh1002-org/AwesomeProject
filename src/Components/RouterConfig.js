@@ -7,7 +7,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import Color from './ColorConfig'
 
-import { StackNavigator, TabNavigator } from 'react-navigation';
+import { StackNavigator, TabNavigator, NavigationActions } from 'react-navigation';
 
 import Tasks from './Tasks/Tasks.js';
 import TaskDetail from './TaskDetail/TaskDetail.js';
@@ -28,6 +28,7 @@ const Tasks_Stack = StackNavigator({
   TaskDetail_Screen: {
     screen: TaskDetail,
     navigationOptions: ( {navigation} ) => {
+      console.log(navigation);
       return {
         title: `${navigation.state.params.item.name}`,
         headerRight:
@@ -37,13 +38,23 @@ const Tasks_Stack = StackNavigator({
         </TouchableOpacity>,
         headerStyle: {
           backgroundColor: Color.purple
-         },
+        },
         headerTintColor: 'white'
 
       }
     }
   },
 });
+
+const navigateOnce = (getStateForAction) => (action, state) => {
+    const { type, routeName } = action;
+    return (
+        state &&
+        type === NavigationActions.NAVIGATE &&
+        routeName === state.routes[state.routes.length - 1].routeName
+    ) ? state : getStateForAction(action, state);
+};
+Tasks_Stack.router.getStateForAction = navigateOnce(Tasks_Stack.router.getStateForAction);
 
 const Setting_Stack = StackNavigator({
   Settings: {
