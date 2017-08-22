@@ -9,8 +9,7 @@ import {
   Image,
   ActivityIndicator,
   ScrollView,
-  KeyboardAvoidingView,
-  Alert
+  KeyboardAvoidingView
 } from 'react-native';
 import Color from '../ColorConfig';
 

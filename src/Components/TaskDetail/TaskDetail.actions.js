@@ -1,4 +1,5 @@
 import ImagePicker from 'react-native-image-picker';
+
 var options = {
   title: 'Select Images',
   storageOptions: {
@@ -10,11 +11,13 @@ const _pickImageFromCamera = () => {
   return dispatch => {
     return ImagePicker.launchCamera(options, (response) => {
       if (!response.didCancel && !response.error && !response.customButton) {
-        let uri = response.uri;
-        let name = response.fileName;
-        let key = name.split('.')[0];
-        let mime = 'image/'+name.split('.')[1];
-        let item = {key: key, name: name, uri: uri, mime: mime, base64: response.data  };
+
+        const uri = response.uri;
+        const array = response.uri.split('/');
+        const name = array[array.length-1];
+        const key = name.split('.')[0];
+        const mime = 'image/'+name.split('.')[1];
+        const item = {key: key, name: name, uri: uri, mime: mime, base64: response.data  };
         dispatch({ type: 'ADD_IMAGE', data: item})
       }
     });
@@ -24,11 +27,12 @@ const _pickImageFromLibrary = () => {
   return dispatch => {
     return ImagePicker.launchImageLibrary(options, (response) => {
       if (!response.didCancel && !response.error && !response.customButton) {
-        let uri = response.uri;
-        let name = response.fileName;
-        let key = name.split('.')[0];
-        let mime = 'image/'+name.split('.')[1];
-        let item = {key: key, name: name, uri: uri, mime: mime, base64: response.data  };
+
+        const uri = response.uri;
+        const name = response.fileName;
+        const key = name.split('.')[0];
+        const mime = 'image/'+name.split('.')[1];
+        const item = {key: key, name: name, uri: uri, mime: mime, base64: response.data  };
         dispatch({ type: 'ADD_IMAGE', data: item})
       }
     });
