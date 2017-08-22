@@ -73,15 +73,15 @@ const _uploadSingle = (dispatch, arrayData, timeStamp, index) => {
 
 const uploadedImage = [];
 const _submit = (arrayData, note, taskKey, uid) => {
+  if(!note || !arrayData.length){
+    return;
+  }
   return dispatch => {
-    if(!note || !arrayData.length){
-      return;
-    }
+    dispatch({type: 'START_UPLOAD'});
 
     uploadedImage = [];
     let timeStamp = new Date().getTime() + (Math.floor(Math.random() * 8999) + 1000).toString();
 
-    dispatch({type: 'START_UPLOAD'});
     return _uploadSingle(dispatch, arrayData, timeStamp, arrayData.length).then(imagesArray=>{
 
       let Root = firebase.database().ref();

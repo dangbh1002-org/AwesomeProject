@@ -9,7 +9,8 @@ import {
   Image,
   ActivityIndicator,
   ScrollView,
-  KeyboardAvoidingView
+  KeyboardAvoidingView,
+  Alert
 } from 'react-native';
 import Color from '../ColorConfig';
 
@@ -38,6 +39,9 @@ class TaskDetail extends Component {
   }
 
   _submit(){
+    if(this.props.state.taskDetail.isLoading){
+      return;
+    }
     this.props.dispatch(
       _submit(
         this.props.state.taskDetail.imageArray,
